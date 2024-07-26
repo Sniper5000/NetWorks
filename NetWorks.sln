@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetWorks Library", "NetWorks Library\NetWorks Library.csproj", "{4BCAE0D5-85D0-45C8-8805-C89F776CCE7F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{176AD496-35E6-405A-97F2-43FB8112F891} = {176AD496-35E6-405A-97F2-43FB8112F891}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetWorks Lib DLL", "NetWorks Lib DLL\NetWorks Lib DLL.csproj", "{176AD496-35E6-405A-97F2-43FB8112F891}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4BCAE0D5-85D0-45C8-8805-C89F776CCE7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BCAE0D5-85D0-45C8-8805-C89F776CCE7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BCAE0D5-85D0-45C8-8805-C89F776CCE7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BCAE0D5-85D0-45C8-8805-C89F776CCE7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{176AD496-35E6-405A-97F2-43FB8112F891}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{176AD496-35E6-405A-97F2-43FB8112F891}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{176AD496-35E6-405A-97F2-43FB8112F891}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{176AD496-35E6-405A-97F2-43FB8112F891}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {65AE0B1F-7942-4F35-90ED-D47B96568374}
+	EndGlobalSection
+EndGlobal
