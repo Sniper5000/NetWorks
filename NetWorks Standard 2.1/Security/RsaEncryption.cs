@@ -9,14 +9,14 @@ namespace NetWorks.Security
     {
         public static byte[] Encrypt(SecurityKey publicKey, byte[] bytes)
         {
-            RSACryptoServiceProvider rsa = new();
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
             rsa.FromXmlString(publicKey.XmlString);
             return rsa.Encrypt(bytes, false);
         }
 
         public static byte[] Decrypt(SecurityKey privateKey, byte[] encryptedBytes)
         {
-            RSACryptoServiceProvider rsa = new();
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
             rsa.FromXmlString(privateKey.XmlString);
             return rsa.Decrypt(encryptedBytes, false);
         }

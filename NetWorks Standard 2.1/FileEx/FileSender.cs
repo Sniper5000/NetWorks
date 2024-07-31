@@ -12,7 +12,7 @@ namespace NetWorks.FileEx
 
         public FileSender(Stream outputStream, SecurityKey publicKey, int BufferSize = 8 * 1024)
         {
-            dataSender = new(outputStream, publicKey, BufferSize);
+            dataSender = new SecureDataSender(outputStream, publicKey, BufferSize);
         }
         /// <summary>
         /// Sends a file from <see cref="string"/> path
@@ -22,7 +22,7 @@ namespace NetWorks.FileEx
         /// <param name="encrypted"><see cref="bool"/> encrypt file?</param>
         public void SendFile(string path, int tag = -1, bool encrypted = false)
         {
-            using FileStream fileStream = new(path, FileMode.Open);
+            using FileStream fileStream = new FileStream(path, FileMode.Open);
             string filename = Path.GetFileName(path);
             SendFile(fileStream, Encoding.ASCII.GetBytes(filename), tag, encrypted);
         }
@@ -35,7 +35,7 @@ namespace NetWorks.FileEx
         /// <param name="encrypted"><see cref="bool"/> Encrypt?</param>
         private void SendFile(Stream fileContentsStream, byte[] filename, int tag, bool encrypted)
         {
-            using MemoryStream headerStream = new();
+            using MemoryStream headerStream = new MemoryStream();
             headerStream.Write(BitConverter.GetBytes(fileContentsStream.Length));
             headerStream.Write(BitConverter.GetBytes(tag));
             headerStream.WriteByte((byte)(encrypted ? 1 : 0));
