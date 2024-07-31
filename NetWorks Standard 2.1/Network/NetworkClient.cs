@@ -19,7 +19,7 @@ namespace NetWorks.Network
         private readonly SecurityKey remotePublicKey;
         private readonly Action<byte[], NetworkProtocol, bool> dataReceiveCallback;
         private readonly Func<int, NetworkProtocol, bool> allowDataCallback;
-        private readonly Stopwatch timer = new();
+        private readonly Stopwatch timer = new Stopwatch();
         private long TxThroughput = -1;
         private long RxThroughput = -1;
         private bool Metrics = false; //If enabled.. Send and Receive will be measured.
@@ -81,7 +81,7 @@ namespace NetWorks.Network
                     break;
                 case NetworkProtocol.UDP:
                     {
-                        using MemoryStream stream = new();
+                        using MemoryStream stream = new MemoryStream();
                         SendPacket(stream, data, encrypt);
                         var ARR = stream.ToArray();
                         udpClient.Send(ARR, ARR.Length);
@@ -142,7 +142,7 @@ namespace NetWorks.Network
                 {
                     IPEndPoint? remoteEP = null;
                     byte[] data = udpClient.Receive(ref remoteEP);
-                    using MemoryStream stream = new(data);
+                    using MemoryStream stream = new MemoryStream(data);
                     ReceivePacket(stream, NetworkProtocol.UDP);
                 }
                 catch (SocketException ex) when (ex.ErrorCode == 10004)

@@ -17,7 +17,7 @@ namespace NetWorks.Security
         {
             this.inputStream = inputStream;
             this.aes = aes;
-            cryptoStream = new(inputStream, aes.CreateDecryptor(), CryptoStreamMode.Read, true);
+            cryptoStream = new CryptoStream(inputStream, aes.CreateDecryptor(), CryptoStreamMode.Read, true);
         }
 
         public static DecryptionAedmStream SetupDecryption(SecurityKey privateKey, Stream inputStream)
@@ -26,7 +26,7 @@ namespace NetWorks.Security
             aes.Key = RsaEncryption.Decrypt(privateKey, ReadByteArray(inputStream));
             aes.IV = RsaEncryption.Decrypt(privateKey, ReadByteArray(inputStream));
 
-            DecryptionAedmStream aedmStream = new(inputStream, aes);
+            DecryptionAedmStream aedmStream = new DecryptionAedmStream(inputStream, aes);
             return aedmStream;
         }
 

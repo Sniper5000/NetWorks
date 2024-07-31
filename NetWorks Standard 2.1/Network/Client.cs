@@ -8,7 +8,7 @@ namespace NetWorks.Network
     class Client
     {
         public int Id;
-        public readonly SecurityKeypair Keys = new();
+        public readonly SecurityKeypair Keys = new SecurityKeypair();
         public SecurityKey? RemotePublicKey;
 
         public int? TxLengthLimit;
@@ -29,8 +29,8 @@ namespace NetWorks.Network
         /// <exception cref="NullReferenceException"></exception>
         public void Connect(string hostname, int port)
         {
-            TcpClient tcpClient = new(hostname, port);
-            UdpClient udpClient = new(0);
+            TcpClient tcpClient = new TcpClient(hostname, port);
+            UdpClient udpClient = new UdpClient(0);
 
             IPEndPoint localEndPoint = (udpClient.Client.LocalEndPoint as IPEndPoint) ?? throw new NullReferenceException();
             IPEndPoint remoteEndPoint = (tcpClient.Client.RemoteEndPoint as IPEndPoint) ?? throw new NullReferenceException();
@@ -48,7 +48,7 @@ namespace NetWorks.Network
             Id = handshake.ClientId;
 
             // TODO dropped data virtual method unused
-            networkClient = new(tcpClient, udpClient, Keys.PrivateKey, RemotePublicKey,
+            networkClient = new NetworkClient(tcpClient, udpClient, Keys.PrivateKey, RemotePublicKey,
                 (data, protocol, enc) => baseClient.DataReceived(data, protocol, enc),
                 (dataLength, protocol) =>
                 {

@@ -9,28 +9,37 @@ namespace NetWorks.Utils
     {
         // Hundreds? nah, Ks? nah, Ms? how about Bs? , Ts? not enough?, then Qs? 
         // Sadly not enough but long won't let us go any higher D:
-        private static readonly List<NumberSuffixEntry> numberMagnitudeSuffixes = new()
+        private static readonly List<NumberSuffixEntry> numberMagnitudeSuffixes = new List<NumberSuffixEntry>()
     {
-        { new((long)Math.Pow(1000, 1), "K") },
-        { new((long)Math.Pow(1000, 2), "M") },
-        { new((long)Math.Pow(1000, 3), "B") },
-        { new((long)Math.Pow(1000, 4), "T") },
-        { new((long)Math.Pow(1000, 5), "Q") },
-        { new((long)Math.Pow(1000, 6), "Qn") },
+        { new NumberSuffixEntry((long) Math.Pow(1000, 1), "K") },
+        { new NumberSuffixEntry((long) Math.Pow(1000, 2), "M") },
+        { new NumberSuffixEntry((long) Math.Pow(1000, 3), "B") },
+        { new NumberSuffixEntry((long) Math.Pow(1000, 4), "T") },
+        { new NumberSuffixEntry((long) Math.Pow(1000, 5), "Q") },
+        { new NumberSuffixEntry((long) Math.Pow(1000, 6), "Qn") },
     };
 
-        private static readonly List<NumberSuffixEntry> dataMagnitudeSuffixes = new()
+        private static readonly List<NumberSuffixEntry> dataMagnitudeSuffixes = new List<NumberSuffixEntry>()
     {
-        { new((long)Math.Pow(1024, 0), "B") },
-        { new((long)Math.Pow(1024, 1), "KB") },
-        { new((long)Math.Pow(1024, 2), "MB") },
-        { new((long)Math.Pow(1024, 3), "GB") },
-        { new((long)Math.Pow(1024, 4), "TB") },
-        { new((long)Math.Pow(1024, 5), "PB") },
-        { new((long)Math.Pow(1024, 6), "EB") },
+        { new NumberSuffixEntry((long)Math.Pow(1024, 0), "B") },
+        { new NumberSuffixEntry((long) Math.Pow(1024, 1), "KB") },
+        { new NumberSuffixEntry((long) Math.Pow(1024, 2), "MB") },
+        { new NumberSuffixEntry((long) Math.Pow(1024, 3), "GB") },
+        { new NumberSuffixEntry((long) Math.Pow(1024, 4), "TB") },
+        { new NumberSuffixEntry((long) Math.Pow(1024, 5), "PB") },
+        { new NumberSuffixEntry((long) Math.Pow(1024, 6), "EB") },
     };
 
-        private record NumberSuffixEntry(long UnitValue, string Suffix);
+        private class NumberSuffixEntry
+        {
+            public long UnitValue;
+            public string Suffix;
+            public NumberSuffixEntry(long UValue, string Sfx)
+            {
+                UnitValue = UValue;
+                Suffix = Sfx;
+            }
+        };
 
 
         public static string FormatNumberMagnitudeInteger(float number)

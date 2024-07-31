@@ -10,7 +10,7 @@ namespace NetWorks.Network
         /// <param name="port">Port</param>
         public void Run(string hostname, int port)
         {
-            Server server = new(this);
+            Server server = new Server(this);
             server.Run(hostname, port);
         }
         /// <summary>

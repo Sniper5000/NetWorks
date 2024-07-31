@@ -22,7 +22,7 @@ namespace NetWorks.Network
             Server = server;
             ClientPublicKey = clientPublicKey;
             Keys = selfKeys;
-            networkClient = new(tcpClient, udpClient, selfKeys.PrivateKey, clientPublicKey,
+            networkClient = new NetworkClient(tcpClient, udpClient, selfKeys.PrivateKey, clientPublicKey,
                 (data, protocol, enc) => Server.ServerHandler.DataReceived(this, data, protocol, enc),
                 (dataLength, protocol) =>
                 {

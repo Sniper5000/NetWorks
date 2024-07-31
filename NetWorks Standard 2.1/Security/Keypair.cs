@@ -14,9 +14,9 @@ namespace NetWorks.Security
 
         public SecurityKeypair(int keySize = 2048)
         {
-            RSACryptoServiceProvider rsa = new(keySize);
-            PublicKey = new(rsa.ToXmlString(false));
-            PrivateKey = new(rsa.ToXmlString(true));
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(keySize);
+            PublicKey = new SecurityKey(rsa.ToXmlString(false));
+            PrivateKey = new SecurityKey(rsa.ToXmlString(true));
         }
     }
 
