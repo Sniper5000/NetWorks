@@ -1,3 +1,4 @@
+using MemoryPack;
 using NetWorks;
 using System;
 using System.Collections.Generic;
@@ -5,8 +6,8 @@ using System.Collections.Generic;
 public class Protocol
 {
     private int messageIdCounter = 1;
-    private Dictionary<Type, int> messageTypeToId = new();
-    private Dictionary<int, Type> messageIdToType = new();
+    private Dictionary<Type, int> messageTypeToId = new Dictionary<Type, int>();
+    private Dictionary<int, Type> messageIdToType = new Dictionary<int, Type>();
 
 
     public void RegisterMessage(Type messageType)
@@ -47,7 +48,7 @@ public static class ProtocolMethods
 
     public static Protocol BuildFromType(Type protocolType)
     {
-        Protocol protocol = new();
+        Protocol protocol = new Protocol();
 
         foreach(Type type in protocolType.GetNestedTypes())
         {
@@ -86,9 +87,19 @@ public static class ProtocolMethods
     {
         int id = protocol.GetMessageId(message.GetType());
         byte[] body = Transports.SerializeBClass(message);
-        Message messageObject = new(id, body);
+        Message messageObject = new Message(id, body);
         return Transports.SerializeBClass(messageObject);
     }
 }
 
-public record Message(int Id, byte[] Body);
+[MemoryPackable]
+public partial class Message 
+{
+    public int Id;
+    public byte[] Body;
+    public Message(int Id, byte[] Body)
+    {
+        this.Id = Id;
+        this.Body = Body;
+    }
+};

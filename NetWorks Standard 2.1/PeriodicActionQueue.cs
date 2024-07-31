@@ -7,11 +7,11 @@ using System.Threading;
 /// </summary>
 public class PeriodicActionQueue
 {
-    private readonly ConcurrentQueue<Action> pendingActions = new();
+    private readonly ConcurrentQueue<Action> pendingActions = new ConcurrentQueue<Action>();
 
     public PeriodicActionQueue(int intervalMs)
     {
-        Timer _ = new(_ => Tick(), null, 0, intervalMs);
+        Timer _ = new Timer(_ => Tick(), null, 0, intervalMs);
     }
 
     public void Enqueue(Action action)

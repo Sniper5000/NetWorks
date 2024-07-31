@@ -14,7 +14,7 @@ namespace NetWorks.FileEx
 
         public FileReceiver(Stream inputStream, SecurityKey privateKey, int bufferSize = 8 * 1024)
         {
-            dataReceiver = new(inputStream, privateKey);
+            dataReceiver = new SecureDataReceiver(inputStream, privateKey);
             BufferSize = bufferSize;
         }
 
@@ -27,14 +27,14 @@ namespace NetWorks.FileEx
             dataReceiver.DataAmountUpdated = null;
             dataReceiver.IsEncrypted = false;
             byte[] header = dataReceiver.ReceiveData();
-            using MemoryStream headerStream = new(header);
+            using MemoryStream headerStream = new MemoryStream(header);
             long fileSize = BitConverter.ToInt64(headerStream.ReadExactly(8));
             tag = BitConverter.ToInt32(headerStream.ReadExactly(4));
             bool encrypted = headerStream.ReadByte() == 1;
             int filenameLen = BitConverter.ToInt32(headerStream.ReadExactly(4));
             string filename = Encoding.ASCII.GetString(headerStream.ReadExactly(filenameLen));
             string outputPath = Path.Join(directory, filename);
-            using FileStream fileStream = new(outputPath, FileMode.Create, FileAccess.Write, FileShare.Read, BufferSize);
+            using FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.Read, BufferSize);
 
             dataReceiver.DataAmountUpdated = amount => DataAmountUpdated?.Invoke(amount, fileSize);
             dataReceiver.IsEncrypted = encrypted;
@@ -51,7 +51,7 @@ namespace NetWorks.FileEx
             dataReceiver.DataAmountUpdated = null;
             dataReceiver.IsEncrypted = false;
             byte[] header = dataReceiver.ReceiveData();
-            using MemoryStream headerStream = new(header);
+            using MemoryStream headerStream = new MemoryStream(header);
             long fileSize = BitConverter.ToInt64(headerStream.ReadExactly(8));
             tag = BitConverter.ToInt32(headerStream.ReadExactly(4));
             bool encrypted = headerStream.ReadByte() == 1;
@@ -70,7 +70,7 @@ namespace NetWorks.FileEx
         /// <returns>Received <see cref="byte"/>[]</returns>
         public byte[] ReceiveFile(out string filename, out int tag)
         {
-            using MemoryStream fileContents = new();
+            using MemoryStream fileContents = new MemoryStream();
             ReceiveFile(fileContents, out filename, out tag);
             return fileContents.ToArray();
         }

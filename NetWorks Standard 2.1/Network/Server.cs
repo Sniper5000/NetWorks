@@ -18,7 +18,7 @@ namespace NetWorks.Network
 
         public void Run(string hostname, int port)
         {
-            TcpListener listener = new(IPAddress.Parse(hostname), port);
+            TcpListener listener = new TcpListener(IPAddress.Parse(hostname), port);
             listener.Start();
 
             bool keepListening = true;
@@ -31,10 +31,10 @@ namespace NetWorks.Network
 
         private void HandleClient(TcpClient tcpClient)
         {
-            SecurityKeypair keys = new();
+            SecurityKeypair keys = new SecurityKeypair();
             int clientId = clientIdCounter++;
 
-            UdpClient udpClient = new(0);
+            UdpClient udpClient = new UdpClient(0);
             IPEndPoint localEndPoint = (udpClient.Client.LocalEndPoint as IPEndPoint) ?? throw new NullReferenceException();
             IPEndPoint remoteEndPoint = (tcpClient.Client.RemoteEndPoint as IPEndPoint) ?? throw new NullReferenceException();
             int udpPort = localEndPoint.Port;
@@ -49,7 +49,7 @@ namespace NetWorks.Network
 
             SecurityKey publicKey = SecurityKey.FromXmlString(handshake.PublicKey);
             udpClient.Connect(remoteEndPoint.Address.MapToIPv4(), handshake.ClientUdpPort);
-            ServerClient client = new(clientId, this, keys, publicKey, tcpClient, udpClient);
+            ServerClient client = new ServerClient(clientId, this, keys, publicKey, tcpClient, udpClient);
 
             ServerHandler.ClientReady(client);
 
