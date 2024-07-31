@@ -23,8 +23,8 @@ namespace NetWorks.FileEx
 
         public FileExClient(TcpClient tcpClient, SecurityKey localPrivateKey, SecurityKey remotePublicKey)
         {
-            fileReceiver = new(tcpClient.GetStream(), localPrivateKey, Rx);
-            fileSender = new(tcpClient.GetStream(), remotePublicKey, Tx);
+            fileReceiver = new FileReceiver(tcpClient.GetStream(), localPrivateKey, Rx);
+            fileSender = new FileSender(tcpClient.GetStream(), remotePublicKey, Tx);
         }
         /// <summary>
         /// Streams a file from <see cref="string"/> path
@@ -68,7 +68,7 @@ namespace NetWorks.FileEx
         /// <returns><see cref="FileExClient"/> client</returns>
         public static FileExClient DirectConnect(IPEndPoint endPoint)
         {
-            TcpClient tcpClient = new();
+            TcpClient tcpClient = new TcpClient();
             tcpClient.ReceiveBufferSize = Rx;
             tcpClient.SendBufferSize = Tx;
             tcpClient.Connect(endPoint);
@@ -81,11 +81,11 @@ namespace NetWorks.FileEx
         /// <returns>Active <see cref="FileExClient"/></returns>
         private static FileExClient DirectConnect(TcpClient tcpClient)
         {
-            SecurityKeypair keys = new();
+            SecurityKeypair keys = new SecurityKeypair();
             StreamUtils.SendByteArray(tcpClient.GetStream(), keys.PublicKey.Bytes);
             SecurityKey remotePublicKey = SecurityKey.FromBytes(StreamUtils.ReceiveByteArray(tcpClient.GetStream()));
 
-            return new(tcpClient, keys.PrivateKey, remotePublicKey);
+            return new FileExClient(tcpClient, keys.PrivateKey, remotePublicKey);
         }
         /// <summary>
         /// Starts listening for connections
@@ -94,7 +94,7 @@ namespace NetWorks.FileEx
         /// <param name="handleClient"></param>
         public static void DirectListen(IPEndPoint endPoint, Action<FileExClient> handleClient)
         {
-            listener = new(endPoint);
+            listener = new TcpListener(endPoint);
             listener.Start();
             Listening = true;
             while (Listening)

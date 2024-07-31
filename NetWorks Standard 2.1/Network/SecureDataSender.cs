@@ -23,7 +23,7 @@ namespace NetWorks.Network
 
         public void SendStream(Stream dataStream)
         {
-            DelimitedOutputStream delimitedOutputStream = new(outputStream, BufferSize);
+            DelimitedOutputStream delimitedOutputStream = new DelimitedOutputStream(outputStream, BufferSize);
 
             if (!UseEncryption)
             {

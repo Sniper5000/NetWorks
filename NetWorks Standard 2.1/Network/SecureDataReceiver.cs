@@ -23,7 +23,7 @@ namespace NetWorks.Network
 
         public void ReceiveStream(Stream outputStream)
         {
-            DelimitedInputStream delimitedInputStream = new(inputStream);
+            DelimitedInputStream delimitedInputStream = new DelimitedInputStream(inputStream);
 
             if (!IsEncrypted)
             {
@@ -42,7 +42,7 @@ namespace NetWorks.Network
 
         public byte[] ReceiveData()
         {
-            using MemoryStream bufferStream = new();
+            using MemoryStream bufferStream = new MemoryStream();
             ReceiveStream(bufferStream);
             return bufferStream.ToArray();
         }

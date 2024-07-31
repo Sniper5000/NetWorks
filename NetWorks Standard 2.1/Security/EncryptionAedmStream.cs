@@ -16,12 +16,12 @@ namespace NetWorks.Security
         private EncryptionAedmStream(Stream outputStream)
         {
             this.outputStream = outputStream;
-            cryptoStream = new(outputStream, aes.CreateEncryptor(), CryptoStreamMode.Write, true);
+            cryptoStream = new CryptoStream(outputStream, aes.CreateEncryptor(), CryptoStreamMode.Write, true);
         }
 
         public static EncryptionAedmStream SetupEncryption(SecurityKey publicKey, Stream outputStream)
         {
-            EncryptionAedmStream aedmStream = new(outputStream);
+            EncryptionAedmStream aedmStream = new EncryptionAedmStream(outputStream);
             WriteByteArray(outputStream, RsaEncryption.Encrypt(publicKey, aedmStream.aes.Key));
             WriteByteArray(outputStream, RsaEncryption.Encrypt(publicKey, aedmStream.aes.IV));
             return aedmStream;

@@ -16,7 +16,7 @@ namespace NetWorks.Security
         /// <returns>Encrypted <see cref="byte"/>[]</returns>
         public static byte[] Encrypt(SecurityKey publicKey, byte[] data)
         {
-            using MemoryStream memoryStream = new();
+            using MemoryStream memoryStream = new MemoryStream();
             EncryptionAedmStream encryptionAedmStream = EncryptionAedmStream.SetupEncryption(publicKey, memoryStream);
             encryptionAedmStream.Write(data);
             encryptionAedmStream.FlushFinalBlock();
@@ -30,8 +30,8 @@ namespace NetWorks.Security
         /// <returns>Decrypted <see cref="byte"/>[]</returns>
         public static byte[] Decrypt(SecurityKey privateKey, byte[] data)
         {
-            using MemoryStream inputStream = new(data);
-            using MemoryStream outputStream = new();
+            using MemoryStream inputStream = new MemoryStream(data);
+            using MemoryStream outputStream = new MemoryStream();
             DecryptionAedmStream decryptionAedmStream = DecryptionAedmStream.SetupDecryption(privateKey, inputStream);
             decryptionAedmStream.CopyTo(outputStream);
             return outputStream.ToArray();

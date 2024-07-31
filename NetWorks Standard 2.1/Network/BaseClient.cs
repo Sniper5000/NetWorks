@@ -11,7 +11,7 @@ namespace NetWorks.Network
 
         public BaseClient()
         {
-            client = new(this);
+            client = new Client(this);
         }
 
 
