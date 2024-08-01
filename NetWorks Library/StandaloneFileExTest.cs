@@ -11,23 +11,10 @@ public class StandaloneFileExTest
     private static readonly IPEndPoint endPoint = new(IPAddress.Parse("127.0.0.1"), 9999);
 
     public void Run()
-    {   
+    {
         //Check if the file exists! else, create it
-        if (!File.Exists("Files/UselessTestFile.Useless"))
-        {
-            //Generate!
-            Console.WriteLine("Please input the file size in MB");
-            long Response = long.Parse(Console.ReadLine() ?? throw new NullReferenceException());
-            if (Response * 1048576 > 10737418240)
-            {
-                Console.WriteLine($"Your desired file size {Response} exceeds the 10GB limit and thus has been set to 10GB");
-                Response = 10240;
-            }
-
-            Console.WriteLine("Generating file..");
-            UselessFileGenerator.CreateUselessFile("Files/UselessTestFile.Useless", Response * 1048576);
-            Console.WriteLine("Complete!");
-        }
+        //Asks the User how large they want the test file to be.. it's created only once.
+        UselessFileGenerator.TryCreateUselessFile("Files/UselessTestFile.Useless", 10737418240);
 
         Task.Run(RunServer);
         var fileExClient = NetWorks.FileEx.FileExClient.DirectConnect(endPoint);

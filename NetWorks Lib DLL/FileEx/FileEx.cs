@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using NetWorks.FileEx;
 using NetWorks.Network;

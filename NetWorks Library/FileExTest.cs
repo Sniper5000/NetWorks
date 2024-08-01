@@ -44,21 +44,7 @@ public class FileExTest
         public void ClientConnectFileEx(int clientId, FileExClient fileExClient)
         {
             //Check if the file exists! else, create it
-            if (!File.Exists("Files/TestFile.Useless"))
-            {
-                //Generate!
-                Console.WriteLine("Please input the file size in MB");
-                long Response = long.Parse(Console.ReadLine() ?? throw new NullReferenceException());
-                if (Response * 1048576 > 1073741824)
-                {
-                    Console.WriteLine($"Your desired file size {Response} exceeds the 1GB limit and thus has been set to 1GB");
-                    Response = 1024;
-                }
-
-                Console.WriteLine("Generating file..");
-                UselessFileGenerator.CreateUselessFile("Files/TestFile.Useless", Response * 1048576);
-                Console.WriteLine("Complete!");
-            }
+            UselessFileGenerator.TryCreateUselessFile("Files/TestFile.Useless");
             fileExClient.StreamFile("Files/TestFile.Useless", encrypt: true);
         }
 

@@ -21,11 +21,6 @@ namespace NetWorks
                 Console.WriteLine($"Null Reference");
                 throw new NullReferenceException();
             }
-            if (!obj.GetType().IsSerializable)
-            {
-                Console.WriteLine($"The object is an instance of a class that is not flagged as serializable");
-                throw new ArgumentException("The object is an instance of a class that is not flagged as serializable", nameof(obj));
-            }
 
             var bytes = MemoryPackSerializer.Serialize(obj);
 
@@ -70,11 +65,6 @@ namespace NetWorks
             {
                 Console.WriteLine($"Null Reference");
                 throw new NullReferenceException();
-            }
-            if (!obj.GetType().IsSerializable)
-            {
-                Console.WriteLine($"This hasn't been marked as serializeable {nameof(obj)}");
-                throw new ArgumentException("The object is an instance of a class that is not flagged as serializable", nameof(obj));
             }
 
             var bytes = MemoryPackSerializer.Serialize(obj.GetType(), obj);
@@ -121,11 +111,6 @@ namespace NetWorks
             {
                 Console.WriteLine($"Null Reference");
                 throw new NullReferenceException();
-            }
-            if (!obj.GetType().IsSerializable)
-            {
-                Console.WriteLine($"This hasn't been marked as serializeable {nameof(obj)}");
-                throw new ArgumentException("The object is an instance of a class that is not flagged as serializable", nameof(obj));
             }
 
             var bytes = MemoryPackSerializer.Serialize(obj.GetType(), obj);

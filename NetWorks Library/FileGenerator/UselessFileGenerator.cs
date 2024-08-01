@@ -74,5 +74,39 @@ namespace NetWorks_Library.FileGenerator
             fileStream.Flush();
             fileStream.Close();
         }
+
+        /// <summary>
+        /// Console ONLY 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="MaxSize"></param>
+        /// <exception cref="NullReferenceException"></exception>
+        public static void TryCreateUselessFile(string path, long MaxSize = 1073741824)
+        {
+            if (MaxSize < 1048576 * 4)
+                MaxSize = 1048576 * 4; //Minimum 4MB as max since 1MB is the min
+            //Check if the file exists! else, create it
+            if (!File.Exists(path))
+            {
+                //Generate!
+                Console.WriteLine($"Please input the file size in MB (Max Size is {NumberFormatting.FormatDataMagnitude(MaxSize)})");
+                long Response = long.Parse(Console.ReadLine() ?? throw new NullReferenceException());
+                if (Response * 1048576 > MaxSize)
+                {
+                    Console.WriteLine($"Your desired file size {Response} exceeds the {NumberFormatting.FormatDataMagnitude(MaxSize)} limit and thus has been set to 1GB");
+                    Response = MaxSize / 1048576;
+                }
+
+                Console.WriteLine("Generating file..");
+                UselessFileGenerator.CreateUselessFile(path, Response * 1048576);
+                Console.WriteLine("Complete!");
+            }
+            else
+            {
+                var ATT = File.OpenRead(path);
+                Console.WriteLine($"File found!.. {NumberFormatting.FormatDataMagnitude(ATT.Length)}");
+                ATT.Close();
+            }
+        }
     }
 }

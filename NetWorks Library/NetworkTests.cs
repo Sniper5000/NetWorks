@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using NetWorks.FileEx;
 using NetWorks.Network;
 using NetWorks.Security;
+using NetWorks_Library.FileGenerator;
 
 public static class NetworkTests
 {
@@ -14,7 +15,9 @@ public static class NetworkTests
         FileSender send = new(exchange, keys.PublicKey);
         FileReceiver recv = new(exchange, keys.PrivateKey);
 
-        send.SendFile("Files/TestFile.jpg");
+        UselessFileGenerator.TryCreateUselessFile("Files/TestFile.Useless");
+
+        send.SendFile("Files/TestFile.Useless");
         exchange.Seek(0, SeekOrigin.Begin);
         byte[] file = recv.ReceiveFile(out string _, out int tag);
         Console.WriteLine("Received {0} bytes", file.Length);
@@ -34,7 +37,10 @@ public static class NetworkTests
             TcpClient sClient = server.AcceptTcpClient();
             SecurityChallenge.PerformChallengeServer(sClient, clientKeys.PublicKey);
             FileSender send = new(sClient.GetStream(), clientKeys.PublicKey);
-            send.SendFile("Files/TestFile.jpg");
+
+            UselessFileGenerator.TryCreateUselessFile("Files/TestFile.Useless");
+
+            send.SendFile("Files/TestFile.Useless");
         });
 
         client.Connect(endpoint);
