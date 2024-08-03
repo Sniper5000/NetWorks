@@ -9,6 +9,8 @@ using System.Threading;
 using System.Text;
 using NetWorks.Serializables;
 using System.Net.Http.Headers;
+using MemoryPack;
+using System.Numerics;
 
 //A very cut down version of MathThreader Lib. supports vector2 & vector3 math.
 namespace MathThreader
@@ -100,6 +102,36 @@ namespace MathThreader
             return start_value + (end_value - start_value) * t;
         }
 
+        /// <summary>
+        /// checks if A and B are approximately the same value
+        /// </summary>
+        /// <param name="a">Value A</param>
+        /// <param name="b">Value B</param>
+        /// <returns>true if A & B are approximately the same value</returns>
+        public static bool Approximately(float a, float b)
+        {
+            return Math.Abs(b - a) < Math.Max(1E-06f * Math.Max(Math.Abs(a), Math.Abs(b)), float.Epsilon * 8f);
+        }
+
+        public static bool Approximately(Vector2Ser A, Vector2Ser B)
+        {
+            if (Approximately(A.x, B.x) && Approximately(A.y, B.y))
+                return true;
+            else
+                return false;
+        }
+
+        public static bool Approximately(Vector3Ser A, Vector3Ser B)
+        {
+            if (Approximately(A.x, B.x) && Approximately(A.y, B.y) && Approximately(A.z, B.z))
+                return true;
+            else
+                return false;
+        }
+
+        public static bool Approximately(Vector2Ser A, Vector3Ser B) => Approximately(A, new Vector2Ser(B.x, B.y));
+
+        public static bool Approximately(Vector3Ser A, Vector2Ser B) => Approximately(B, A);
 
         public static float EaseIn(float start_value, float target_value, float time_elapsed, float duration)
         {
@@ -174,8 +206,8 @@ namespace MathThreader
 
     } //MathHX Library / Structs / Basic Functions
 
-    [Serializable]
-    public struct Vector3Ser
+    [Serializable, MemoryPackable]
+    public partial struct Vector3Ser
     {
         public float x, y, z;
 
@@ -238,24 +270,26 @@ namespace MathThreader
 
 
         //UNITY ONLY
+        /*
         /// <summary>
         /// Automatic conversion from SerializableVector3 to Vector3
         /// </summary>
         /// <param name="rValue"></param>
         /// <returns></returns>
-        //public static implicit operator Vector3(Vector3Ser rValue)
-        //{
-        //    return new Vector3(rValue.x, rValue.y, rValue.z);
-        //}
+        public static implicit operator Vector3(Vector3Ser rValue)
+        {
+            return new Vector3(rValue.x, rValue.y, rValue.z);
+        }
         /// <summary>
         /// Automatic conversion from Vector3 to SerializableVector3
         /// </summary>
         /// <param name="rValue"></param>
         /// <returns></returns>
-        //public static implicit operator Vector3Ser(Vector3 rValue)
-        //{
-        //    return new Vector3Ser(rValue.x, rValue.y, rValue.z);
-        //}
+        public static implicit operator Vector3Ser(Vector3 rValue)
+        {
+            return new Vector3Ser(rValue.x, rValue.y, rValue.z);
+        }
+        */
         //END
 
         /// <summary>
@@ -279,10 +313,16 @@ namespace MathThreader
         public static Vector3Ser operator /(Vector3Ser a, float b) => new Vector3Ser(a.x / b, a.y / b, a.z / b);
         public static Vector3Ser operator *(Vector3Ser a, Vector3Ser b) => new Vector3Ser(a.x * b.x, a.y * b.y, a.z * b.z);
         public static Vector3Ser operator *(Vector3Ser a, float b) => new Vector3Ser(a.x * b, a.y * b, a.z * b);
+
+        //Logic Operators
+        public static bool operator ==(Vector3Ser a, Vector3Ser b) => MathHX.Approximately(a, b);
+        public static bool operator !=(Vector3Ser a, Vector3Ser b) => !MathHX.Approximately(a, b);
+        public static bool operator ==(Vector3Ser a, Vector2Ser b) => MathHX.Approximately(a, b);
+        public static bool operator !=(Vector3Ser a, Vector2Ser b) => !MathHX.Approximately(a, b);
     }
 
-    [Serializable]
-    public struct Vector2Ser
+    [Serializable, MemoryPackable]
+    public partial struct Vector2Ser
     {
         public float x, y;
 
@@ -367,10 +407,17 @@ namespace MathThreader
         public static Vector2Ser operator *(Vector2Ser a, Vector2Ser b) => new Vector2Ser(a.x * b.x, a.y * b.y);
         public static Vector2Ser operator *(Vector2Ser a, float b) => new Vector2Ser(a.x * b, a.y * b);
 
+        //Logic Operators
+        public static bool operator ==(Vector2Ser a, Vector2Ser b) => MathHX.Approximately(a, b);
+        public static bool operator !=(Vector2Ser a, Vector2Ser b) => !MathHX.Approximately(a, b);
+        public static bool operator ==(Vector2Ser a, Vector3Ser b) => MathHX.Approximately(b, a);
+        public static bool operator !=(Vector2Ser a, Vector3Ser b) => !MathHX.Approximately(b, a);
+
+
     }
 
-    [Serializable]
-    public class SerializeTexture
+    [Serializable, MemoryPackable]
+    public partial class SerializeTexture
     {
         public int x;
         public int y;
@@ -384,8 +431,8 @@ namespace MathThreader
         }
     }
 
-    [Serializable]
-    public class SerializeAudio
+    [Serializable, MemoryPackable]
+    public partial class SerializeAudio
     {
         public string Name;
         public int Samples;

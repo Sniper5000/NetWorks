@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetWorks Library", "NetWorks Library\NetWorks Library.csproj", "{4BCAE0D5-85D0-45C8-8805-C89F776CCE7F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{176AD496-35E6-405A-97F2-43FB8112F891} = {176AD496-35E6-405A-97F2-43FB8112F891}
+		{39236B32-727E-443A-9099-0090A01CE679} = {39236B32-727E-443A-9099-0090A01CE679}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetWorks Lib DLL", "NetWorks Lib DLL\NetWorks Lib DLL.csproj", "{176AD496-35E6-405A-97F2-43FB8112F891}"
