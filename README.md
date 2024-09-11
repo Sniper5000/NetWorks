@@ -89,6 +89,13 @@ class EventedServer : BaseServer
     }
 }
 ```
+Instantiate your server and run the listener on another thread. (Otherwise the main thread will hang)
+```
+//Example
+var Listener = new EventedServer(); //Change it to your custom server class.
+Task.Run(() => Listener.Run("127.0.0.1", 7777));
+```
+Note: NetWorks runs on multiple threads, as such methods fired by NetWorks will not be running on the main thread.
 
 ## Examples
 
@@ -96,10 +103,56 @@ All standalone examples using NetWorks library can be found here:
 https://github.com/Sniper5000/NetWorks/tree/main/NetWorks%20Library
 
 ## Unity
+Note: NetWorks runs on multiple threads, as such methods fired by NetWorks will not be running on the main thread.
 1. Download NetWorks Standard 2.1 source code or NetWorks(Unity) DLL for both Server & Client.
     NetWorks Standard 2.1: https://github.com/Sniper5000/NetWorks/tree/main/NetWorks%20Standard%202.1
 2. Drag the .dll or source code to your Unity project.
 3. Start using NetWorks.
+
+If it's required to run a method on the main thread from an event fired by NetWorks.
+
+Create a C# Monobehaviour script, Use a custom name or the one used below "RunMainThread"
+```
+using System.Collections.Concurrent;
+using System;
+using UnityEngine;
+
+//If you have used a custom name, change the class name to your custom one
+public class RunMainThread : MonoBehaviour
+{
+    private static ConcurrentQueue<Action> RunOnMainThread = new();
+
+    // Either FixedUpdate or Update will work
+    void Update()
+    {
+        if (!RunOnMainThread.IsEmpty)
+        {
+            lock (RunOnMainThread)
+            {
+                while (RunOnMainThread.TryDequeue(out var action))
+                {
+                    action?.Invoke();
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Runs <see cref="Action"/> on the Main Thread.
+    /// </summary>
+    /// <param name="action">Action to execute</param>
+    public static void Enqueue(Action action)
+    {
+        RunOnMainThread.Enqueue(action);
+    }
+}
+```
+After the script is done, drag it into an empty GameObject. (Keep only 1 instance active)
+
+To run a method on the main thread use
+```
+RunMainThread.Enqueue(() => SomeMethod());
+```
 
 [WIP]: Missing Unity examples and additional documentation.
 
