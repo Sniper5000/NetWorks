@@ -47,7 +47,10 @@ Instantiate your client, and connect to your server program by providing it an I
 ```
 //Example
 var Client = new EventedClient(); //Change it to your custom client class.
-Client.Connect("127.0.0.1", 7777);
+Task.Run(() => 
+{ 
+    Client.Connect("127.0.0.1", 7777); 
+});
 ```
 Once the client is ready, data can be sent by using
 ```
