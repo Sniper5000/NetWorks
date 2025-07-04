@@ -2,7 +2,9 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading.Tasks;
+using NetWorks.Network;
 using NetWorks.Security;
 
 namespace NetWorks.FileEx
@@ -18,13 +20,24 @@ namespace NetWorks.FileEx
         private readonly FileSender fileSender;
         private static bool Listening;
         private static TcpListener listener;
-        private static int Rx = 33554432;//32768;
-        private static int Tx = 33554432;//32768;
+        //Buffer sizes
+        private static int Rx = 33554432; //32768
+        private static int Tx = 33554432; //32768
 
-        public FileExClient(TcpClient tcpClient, SecurityKey localPrivateKey, SecurityKey remotePublicKey)
+        public FileExClient(TcpClient tcpClient, SecurityKey localPrivateKey, SecurityKey remotePublicKey, long RxTransferSpeed = 0, long TxTransferSpeed = 0)
         {
-            fileReceiver = new(tcpClient.GetStream(), localPrivateKey, Rx);
-            fileSender = new(tcpClient.GetStream(), remotePublicKey, Tx);
+            //fileReceiver = new(tcpClient.GetStream(), localPrivateKey, Rx);
+            //fileSender = new(tcpClient.GetStream(), remotePublicKey, Tx);
+            if (RxTransferSpeed > 0 || TxTransferSpeed > 0)
+            {
+                fileReceiver = new(new ThrottledStream(tcpClient.GetStream(), RxTransferSpeed), localPrivateKey, Rx);
+                fileSender = new(new ThrottledStream(tcpClient.GetStream(), TxTransferSpeed), remotePublicKey, Tx);
+            }
+            else
+            {
+                fileReceiver = new(tcpClient.GetStream(), localPrivateKey, Rx);
+                fileSender = new(tcpClient.GetStream(), remotePublicKey, Tx);
+            }
         }
         /// <summary>
         /// Streams a file from <see cref="string"/> path
@@ -32,9 +45,22 @@ namespace NetWorks.FileEx
         /// <param name="path"><see cref="string"/> File path</param>
         /// <param name="tag"><see cref="int"/> tag</param>
         /// <param name="encrypt"><see cref="bool"/> Encrypt stream?</param>
-        public void StreamFile(string path, int tag = -1, bool encrypt = false)
+        public void StreamFile(string path, int tag = -1, bool encrypt = false, Action<long, long>? handleProgress = null)
         {
+            fileSender.DataAmountUpdated = handleProgress;
             fileSender.SendFile(path, tag, encrypt);
+        }
+
+        /// <summary>
+        /// Streams a stream from <see cref="string"/> path
+        /// </summary>
+        /// <param name="path"><see cref="string"/> File path</param>
+        /// <param name="tag"><see cref="int"/> tag</param>
+        /// <param name="encrypt"><see cref="bool"/> Encrypt stream?</param>
+        public void StreamFile(Stream stream, string filename, int tag = -1, bool encrypt = false, Action<long, long>? handleProgress = null)
+        {
+            fileSender.DataAmountUpdated = handleProgress;
+            fileSender.SendFile(stream, Encoding.ASCII.GetBytes(filename), tag, encrypt);
         }
         /// <summary>
         /// Receives a file from TCP stream and writes it on <see cref="Stream"/> dest
@@ -66,26 +92,26 @@ namespace NetWorks.FileEx
         /// </summary>
         /// <param name="endPoint"> Target IP address and port</param>
         /// <returns><see cref="FileExClient"/> client</returns>
-        public static FileExClient DirectConnect(IPEndPoint endPoint)
+        public static FileExClient DirectConnect(IPEndPoint endPoint, long RxTransferSpeed = 0, long TxTransferSpeed = 0)
         {
             TcpClient tcpClient = new();
             tcpClient.ReceiveBufferSize = Rx;
             tcpClient.SendBufferSize = Tx;
             tcpClient.Connect(endPoint);
-            return DirectConnect(tcpClient);
+            return DirectConnect(tcpClient, RxTransferSpeed, TxTransferSpeed);
         }
         /// <summary>
         /// Sends its public key to allow sending & receiving files.
         /// </summary>
         /// <param name="tcpClient"></param>
         /// <returns>Active <see cref="FileExClient"/></returns>
-        private static FileExClient DirectConnect(TcpClient tcpClient)
+        private static FileExClient DirectConnect(TcpClient tcpClient, long RxTransferSpeed = 0, long TxTransferSpeed = 0)
         {
             SecurityKeypair keys = new();
             StreamUtils.SendByteArray(tcpClient.GetStream(), keys.PublicKey.Bytes);
             SecurityKey remotePublicKey = SecurityKey.FromBytes(StreamUtils.ReceiveByteArray(tcpClient.GetStream()));
 
-            return new(tcpClient, keys.PrivateKey, remotePublicKey);
+            return new(tcpClient, keys.PrivateKey, remotePublicKey, RxTransferSpeed, TxTransferSpeed);
         }
         /// <summary>
         /// Starts listening for connections

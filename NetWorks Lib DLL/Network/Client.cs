@@ -29,14 +29,19 @@ namespace NetWorks.Network
         /// <exception cref="NullReferenceException"></exception>
         public void Connect(string hostname, int port)
         {
-            TcpClient tcpClient = new(hostname, port);
-            UdpClient udpClient = new(0);
+            var IPversion = AddressFamily.InterNetwork;
+            if(hostname.Contains(":"))
+                IPversion = AddressFamily.InterNetworkV6;
+
+            TcpClient tcpClient = new(IPversion);//hostname, port);
+            UdpClient udpClient = new(0, IPversion);
+            tcpClient.Connect(hostname, port);
 
             IPEndPoint localEndPoint = (udpClient.Client.LocalEndPoint as IPEndPoint) ?? throw new NullReferenceException();
             IPEndPoint remoteEndPoint = (tcpClient.Client.RemoteEndPoint as IPEndPoint) ?? throw new NullReferenceException();
             int udpPort = localEndPoint.Port;
 
-            PacketProtocol.Send(tcpClient.GetStream(), Transports.SerializeBClass(new ClientHandshakeData(Keys.PublicKey.XmlString, udpPort)));
+            PacketProtocol.Send(tcpClient.GetStream(), Transports.SerializeBClass(new ClientHandshakeData(Keys.PublicKey.XmlString, udpPort, GeneralSettings.Version)));
             // TODO hardcoded
             const int rxLimit = 4096;
             PacketProtocol.Receive(tcpClient.GetStream(), rxLimit, out int _, out byte[]? handshakeData);
@@ -44,7 +49,22 @@ namespace NetWorks.Network
                 ?? throw new NullReferenceException();
 
             RemotePublicKey = SecurityKey.FromXmlString(handshake.PublicKey);
-            udpClient.Connect(remoteEndPoint.Address.MapToIPv4(), handshake.ServerUdpPort);
+            //TEMPORARY PROBES!
+            Console.WriteLine($"Address Family: {remoteEndPoint.Address.AddressFamily}");
+            if (remoteEndPoint.Address.AddressFamily == AddressFamily.InterNetwork)
+            {
+                udpClient.Connect(remoteEndPoint.Address.MapToIPv4(), handshake.ServerUdpPort);
+                Console.WriteLine("IPv4 Detected");
+            }
+            else if (remoteEndPoint.Address.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                //udpClient = new(udpPort, AddressFamily.InterNetworkV6);
+                //localEndPoint = (udpClient.Client.LocalEndPoint as IPEndPoint) ?? throw new NullReferenceException();
+                udpClient.Connect(remoteEndPoint.Address.MapToIPv6(), handshake.ServerUdpPort);
+                Console.WriteLine("IPv6 Detected");
+            }
+
+            //udpClient.Connect(remoteEndPoint.Address.MapToIPv4(), handshake.ServerUdpPort);
             Id = handshake.ClientId;
 
             // TODO dropped data virtual method unused

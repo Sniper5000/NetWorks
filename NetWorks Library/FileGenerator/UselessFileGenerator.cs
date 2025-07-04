@@ -39,7 +39,7 @@ namespace NetWorks_Library.FileGenerator
             for (int i = 0; i < Rem; i++)
             {
                 var R = MathHX.SRandom();
-                UFile[UFile.Length - i] = R;
+                UFile[UFile.Length - i - 1] = R;
             }
 
             return UFile; //VERY.. useless

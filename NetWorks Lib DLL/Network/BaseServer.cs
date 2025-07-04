@@ -3,6 +3,7 @@ namespace NetWorks.Network
 
     public class BaseServer
     {
+        private Server server;
         /// <summary>
         /// Starts a server with <see cref="string"/> hostname on <see cref="int"/> port
         /// </summary>
@@ -10,8 +11,15 @@ namespace NetWorks.Network
         /// <param name="port">Port</param>
         public void Run(string hostname, int port)
         {
-            Server server = new(this);
+            server = new(this);
             server.Run(hostname, port);
+        }
+        /// <summary>
+        /// Shutsdown the server listener disconnecting all connected clients.
+        /// </summary>
+        public void Shutdown()
+        {
+            server.Shutdown();
         }
         /// <summary>
         /// Fires when a Client has connected

@@ -23,6 +23,7 @@ namespace NetWorks.Network
         private long TxThroughput = -1;
         private long RxThroughput = -1;
         private bool Metrics = false; //If enabled.. Send and Receive will be measured.
+        private bool Shutdown = false;
         public NetworkClient(TcpClient tcpClient, UdpClient udpClient, SecurityKey localPrivateKey, SecurityKey remotePublicKey, Action<byte[], NetworkProtocol, bool> dataReceiveCallback, Func<int, NetworkProtocol, bool> allowDataCallback, bool EnableMetrics = false)
         {
             this.tcpClient = tcpClient;
@@ -51,6 +52,7 @@ namespace NetWorks.Network
         {
             tcpClient.Close();
             udpClient.Close();
+            Shutdown = true;
         }
         /// <summary>
         /// Get current TCP IP Address
@@ -68,6 +70,11 @@ namespace NetWorks.Network
         /// <param name="encrypt">Should the data be encrypted or not (TCP ONLY)</param>
         public void Send(byte[] data, NetworkProtocol protocol, bool encrypt)
         {
+            if (Shutdown)
+            {
+                Console.WriteLine($"Attempted to Send data with a client that has been disconnected.");
+                return; //NOPE
+            }
             // TODO look into using slices/spans/streams if memory issues persist
             if (encrypt)
                 data = AedmEncryption.Encrypt(remotePublicKey, data);

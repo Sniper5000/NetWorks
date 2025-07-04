@@ -9,6 +9,7 @@ namespace NetWorks.FileEx
     public class FileSender
     {
         private readonly SecureDataSender dataSender;
+        public Action<long, long>? DataAmountUpdated;
 
         public FileSender(Stream outputStream, SecurityKey publicKey, int BufferSize = 8 * 1024)
         {
@@ -33,7 +34,7 @@ namespace NetWorks.FileEx
         /// <param name="filename"><see cref="byte"/>[] file name</param>
         /// <param name="tag"><see cref="int"/> tag</param>
         /// <param name="encrypted"><see cref="bool"/> Encrypt?</param>
-        private void SendFile(Stream fileContentsStream, byte[] filename, int tag, bool encrypted)
+        public void SendFile(Stream fileContentsStream, byte[] filename, int tag, bool encrypted)
         {
             using MemoryStream headerStream = new();
             headerStream.Write(BitConverter.GetBytes(fileContentsStream.Length));
@@ -43,6 +44,7 @@ namespace NetWorks.FileEx
             headerStream.Write(filename);
             headerStream.Seek(0, SeekOrigin.Begin);
             // TODO this is not required
+            dataSender.DataAmountUpdated = amount => DataAmountUpdated?.Invoke(amount, fileContentsStream.Length);
             dataSender.UseEncryption = false;
             dataSender.SendStream(headerStream);
             dataSender.UseEncryption = encrypted;

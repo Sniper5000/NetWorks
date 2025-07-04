@@ -40,6 +40,8 @@ public class Program
         library.AddTest("Test encryption/decryption memory usage", () => new EncryptionMemoryUsageTest().Run());
         library.AddTest("Test standalone FileExClient", () => new StandaloneFileExTest().Run());
         library.AddTest("Example: Send file via FileEx", () => new SendFileViaFileEx().Run());
+        library.AddTest("Example: Evented Client & Server test", () => new TestNetWorksServerClient().Run());
+        library.AddTest("Example: Evented Client & Server test IPv6", () => new TestNetWorksServerClientV6().Run());
         return library;
     }
 

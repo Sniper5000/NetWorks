@@ -1,4 +1,5 @@
 using NetWorks.Security;
+using System;
 using System.IO;
 
 namespace NetWorks.Network
@@ -13,6 +14,7 @@ namespace NetWorks.Network
         private EncryptionAedmStream? aedmStream;
         private int BufferSize;
         public bool UseEncryption;
+        public Action<long>? DataAmountUpdated;
 
         public SecureDataSender(Stream outputStream, SecurityKey publicKey, int BufferSize = 8 * 1024)
         {
@@ -27,16 +29,23 @@ namespace NetWorks.Network
 
             if (!UseEncryption)
             {
-                dataStream.CopyTo(delimitedOutputStream);
+                //dataStream.CopyTo(delimitedOutputStream);
+                CopyTo(dataStream, delimitedOutputStream);
             }
             else
             {
                 aedmStream = EncryptionAedmStream.SetupEncryption(publicKey, delimitedOutputStream);
-                dataStream.CopyTo(aedmStream);
+                //dataStream.CopyTo(aedmStream
+                CopyTo(dataStream, aedmStream);
                 aedmStream.FlushFinalBlock();
             }
 
             delimitedOutputStream.Close();
+        }
+
+        private void CopyTo(Stream from, Stream to)
+        {
+            from.CopyToWithProgress(to, amount => DataAmountUpdated?.Invoke(amount));
         }
     }
 }

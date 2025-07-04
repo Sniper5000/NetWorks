@@ -37,7 +37,7 @@ namespace NetWorks.Network
 
         private void CopyTo(Stream from, Stream to)
         {
-            from.CopyToWithProgress(to, amount => DataAmountUpdated?.Invoke(amount));
+            from.CopyToWithProgress(to, amount => DataAmountUpdated?.Invoke(amount), 1024 * 1024);
         }
 
         public byte[] ReceiveData()

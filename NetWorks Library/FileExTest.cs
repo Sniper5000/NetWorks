@@ -16,7 +16,7 @@ public class FileExTest
         Server server = new();
         Task.Run(() => server.Run("127.0.0.1", mainServerPort));
         Client client = new();
-        client.Connect("localhost", mainServerPort);
+        client.Connect("127.0.0.1", mainServerPort);
     }
 
     private class Server : BaseServer
