@@ -15,7 +15,8 @@ namespace NetWorks.Network
         private bool keepListening;
         private TcpListener listener;
         private string hostname;
-
+        private bool Dualmode = false;
+        private AddressFamily family = AddressFamily.InterNetwork;
         public Server(BaseServer serverHandler)
         {
             ServerHandler = serverHandler;
@@ -42,21 +43,44 @@ namespace NetWorks.Network
             listener.Dispose();
         }
 
+        public void RunDual(int port)
+        {
+            Dualmode = true;
+            family = AddressFamily.InterNetworkV6;
+            listener = new(IPAddress.IPv6Any, port);
+            listener.Server.DualMode = true;
+            listener.Start();
+            var EP = listener.Server.LocalEndPoint as IPEndPoint;
+            Port = EP.Port;
+            keepListening = true;
+            while (keepListening)
+            {
+                TcpClient tcpClient = listener.AcceptTcpClient();
+                Console.WriteLine($"Connection Established");
+                Task.Run(() => HandleClient(tcpClient));
+
+            }
+            Console.WriteLine("Shutdown complete");
+            listener.Stop();
+            listener.Dispose();
+            listener = null;
+        }
+
         public void Shutdown()
         {
             keepListening = false;
             TcpClient client = new();    
-            //client.Connect("127.0.0.1", Port);
-            //listener.Stop();
-            if (listener != null)//listener.Pending() || listener != null) //while
+
+            if (listener != null)
             {
-                
-                client.Connect(hostname, Port);//"127.0.0.1", Port);
+                if(hostname == null)
+                    hostname = "localhost";
+
+                client.Connect(hostname, Port);
                 Thread.Sleep(1000);
                 
             }
-            
-            //listener.Stop();
+            Console.WriteLine($"Server Shutdown.");
         }
 
         private void HandleClient(TcpClient tcpClient)
@@ -64,7 +88,10 @@ namespace NetWorks.Network
             SecurityKeypair keys = new();
             int clientId = clientIdCounter++;
 
-            UdpClient udpClient = new(0, AddressFamily.InterNetwork);
+            UdpClient udpClient = new(family);
+            udpClient.Client.DualMode = Dualmode;
+            udpClient.Client.Bind(new IPEndPoint(IPAddress.IPv6Any, 0));
+
             IPEndPoint localEndPoint = (udpClient.Client.LocalEndPoint as IPEndPoint) ?? throw new NullReferenceException();
             IPEndPoint remoteEndPoint = (tcpClient.Client.RemoteEndPoint as IPEndPoint) ?? throw new NullReferenceException();
             int udpPort = localEndPoint.Port;
@@ -83,18 +110,18 @@ namespace NetWorks.Network
                 return;
             }
             SecurityKey publicKey = SecurityKey.FromXmlString(handshake.PublicKey);
-            //TEMPORARY PROBES!
+            // TODO TEMPORARY PROBES!
             if (remoteEndPoint.Address.AddressFamily == AddressFamily.InterNetwork)
             {
                 udpClient.Connect(remoteEndPoint.Address.MapToIPv4(), handshake.ClientUdpPort);
-                Console.WriteLine("IPv4 Detected");
+                Console.WriteLine("IPv4 Client Detected");
             }
             else if (remoteEndPoint.Address.AddressFamily == AddressFamily.InterNetworkV6)
             {
-                udpClient = new(udpPort, AddressFamily.InterNetworkV6);
-                localEndPoint = (udpClient.Client.LocalEndPoint as IPEndPoint) ?? throw new NullReferenceException();
+                //udpClient = new(udpPort, AddressFamily.InterNetworkV6);
+                //localEndPoint = (udpClient.Client.LocalEndPoint as IPEndPoint) ?? throw new NullReferenceException();
                 udpClient.Connect(remoteEndPoint.Address.MapToIPv6(), handshake.ClientUdpPort);
-                Console.WriteLine("IPv6 Detected");
+                Console.WriteLine("IPv6 Client Detected");
             }
 
             ServerClient client = new(clientId, this, keys, publicKey, tcpClient, udpClient);

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using NetWorks.Security;
 
@@ -24,8 +25,13 @@ namespace NetWorks.Network
         private long RxThroughput = -1;
         private bool Metrics = false; //If enabled.. Send and Receive will be measured.
         private bool Shutdown = false;
+        private CancellationTokenSource tokenSource;
+        private CancellationToken ct;
+
         public NetworkClient(TcpClient tcpClient, UdpClient udpClient, SecurityKey localPrivateKey, SecurityKey remotePublicKey, Action<byte[], NetworkProtocol, bool> dataReceiveCallback, Func<int, NetworkProtocol, bool> allowDataCallback, bool EnableMetrics = false)
         {
+            tokenSource = new CancellationTokenSource();
+            ct = tokenSource.Token;
             this.tcpClient = tcpClient;
             this.udpClient = udpClient;
             this.localPrivateKey = localPrivateKey;
@@ -50,9 +56,16 @@ namespace NetWorks.Network
         /// </summary>
         public void Close()
         {
+            //TODO: Fully disconnect client.
+            tokenSource.Cancel();
+            tcpClient.Client.Shutdown(SocketShutdown.Both);
             tcpClient.Close();
+            tcpClient.Dispose();
+            udpClient.Client.Shutdown(SocketShutdown.Both);
             udpClient.Close();
+            udpClient.Dispose();
             Shutdown = true;
+            Console.WriteLine($"NetworkClient Closed");
         }
         /// <summary>
         /// Get current TCP IP Address
@@ -124,6 +137,11 @@ namespace NetWorks.Network
         {
             while (tcpClient.Connected)
             {
+                if (ct.IsCancellationRequested)
+                {
+                    Console.WriteLine("Cancel Request received!");
+                    ct.ThrowIfCancellationRequested();
+                }
                 bool disconnected = true;
 
                 try
@@ -133,10 +151,14 @@ namespace NetWorks.Network
                 }
                 catch (EndOfStreamException) { }
                 catch (IOException) { }
+                catch (SocketException ex) { Console.WriteLine(ex.ToString()); }
 
                 if (disconnected)
                 {
-                    Close();
+                    if (!Shutdown)
+                        Close();
+                    else
+                        return;
                 }
             }
         }
@@ -145,6 +167,11 @@ namespace NetWorks.Network
         {
             while (udpClient.Client != null)
             {
+                if (ct.IsCancellationRequested)
+                {
+                    Console.WriteLine("Cancel Request received!");
+                    ct.ThrowIfCancellationRequested();
+                }
                 try
                 {
                     IPEndPoint? remoteEP = null;
@@ -152,8 +179,9 @@ namespace NetWorks.Network
                     using MemoryStream stream = new(data);
                     ReceivePacket(stream, NetworkProtocol.UDP);
                 }
-                catch (SocketException ex) when (ex.ErrorCode == 10004)
+                catch (SocketException ex)// when (ex.ErrorCode == 10004)
                 {
+                    Console.WriteLine(ex.ToString());
                     break;
                 }
             }

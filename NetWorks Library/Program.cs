@@ -42,6 +42,7 @@ public class Program
         library.AddTest("Example: Send file via FileEx", () => new SendFileViaFileEx().Run());
         library.AddTest("Example: Evented Client & Server test", () => new TestNetWorksServerClient().Run());
         library.AddTest("Example: Evented Client & Server test IPv6", () => new TestNetWorksServerClientV6().Run());
+        library.AddTest("Example: Evented Client & Server test IPv4 & IPv6 (Dualmode)", () => new TestNetWorksServerClientDualmode().Run());
         return library;
     }
 

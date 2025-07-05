@@ -15,6 +15,15 @@ namespace NetWorks.Network
             server.Run(hostname, port);
         }
         /// <summary>
+        /// Starts a server with Dual mode and listens on any interface on <see cref="int"/> port
+        /// </summary>
+        /// <param name="port">Port</param>
+        public void RunDual(int port)
+        {
+            server = new(this);
+            server.RunDual(port);
+        }
+        /// <summary>
         /// Shutsdown the server listener disconnecting all connected clients.
         /// </summary>
         public void Shutdown()
